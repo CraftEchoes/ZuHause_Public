@@ -1,0 +1,423 @@
+@model zuHause.AdminViewModels.AdminPropertyListViewModel
+
+@{
+    var tabId = ViewData["TabId"] as string ?? "all";
+    var tableType = ViewData["TableType"] as string ?? "all";
+    var checkboxClass = ViewData["CheckboxClass"] as string ?? "property-checkbox";
+    var bulkBtnId = ViewData["BulkBtnId"] as string ?? "bulkMessageBtn";
+    var selectAllId = ViewData["SelectAllId"] as string ?? "selectAllProperties";
+    var tableTitle = ViewData["TableTitle"] as string ?? "屋源列表";
+    var paginationLabel = ViewData["PaginationLabel"] as string ?? "屋源分頁";
+    
+    var allProperties = tableType == "pending" ? Model.PendingProperties : Model.Items;
+    
+    // 篩選邏輯 - 從全部資料中篩選
+    var filteredProperties = allProperties.AsEnumerable();
+    
+    // 關鍵字搜尋
+    var searchKeyword = Context.Request.Query["search"].ToString().Trim();
+    var searchField = Context.Request.Query["searchField"].ToString();
+    if (!string.IsNullOrEmpty(searchKeyword))
+    {
+        switch (searchField)
+        {
+            case "propertyID":
+                filteredProperties = filteredProperties.Where(p => p.PropertyID.ToString().Contains(searchKeyword, StringComparison.OrdinalIgnoreCase));
+                break;
+            case "propertyTitle":
+                filteredProperties = filteredProperties.Where(p => p.PropertyTitle != null && p.PropertyTitle.Contains(searchKeyword, StringComparison.OrdinalIgnoreCase));
+                break;
+            case "propertyAddress":
+                filteredProperties = filteredProperties.Where(p => p.Address != null && p.Address.Contains(searchKeyword, StringComparison.OrdinalIgnoreCase));
+                break;
+            case "landlordName":
+                filteredProperties = filteredProperties.Where(p => p.LandlordName != null && p.LandlordName.Contains(searchKeyword, StringComparison.OrdinalIgnoreCase));
+                break;
+            default:
+                // 搜尋全部欄位
+                filteredProperties = filteredProperties.Where(p => 
+                    p.PropertyID.ToString().Contains(searchKeyword, StringComparison.OrdinalIgnoreCase) ||
+                    (p.PropertyTitle != null && p.PropertyTitle.Contains(searchKeyword, StringComparison.OrdinalIgnoreCase)) ||
+                    (p.Address != null && p.Address.Contains(searchKeyword, StringComparison.OrdinalIgnoreCase)) ||
+                    (p.LandlordName != null && p.LandlordName.Contains(searchKeyword, StringComparison.OrdinalIgnoreCase)));
+                break;
+        }
+    }
+    
+    // 屋源狀態篩選
+    var propertyStatus = Context.Request.Query["propertyStatus"].ToString();
+    if (!string.IsNullOrEmpty(propertyStatus))
+    {
+        switch (propertyStatus)
+        {
+            case "pending":
+                // 審核中：PENDING
+                filteredProperties = filteredProperties.Where(p => p.Status == "審核中");
+                break;
+            case "approved":
+                // 審核通過：除了審核中和需重新審核之外的其他狀態
+                filteredProperties = filteredProperties.Where(p => p.Status != "審核中" && p.Status != "需重新審核");
+                break;
+            case "rejected":
+                // 需重新審核：REJECT_REVISE、REJECTED、BANNED對應的狀態
+                filteredProperties = filteredProperties.Where(p => p.Status == "需重新審核");
+                break;
+        }
+    }
+    
+    // 付費狀態篩選
+    var paymentStatus = Context.Request.Query["paymentStatus"].ToString();
+    if (!string.IsNullOrEmpty(paymentStatus))
+    {
+        switch (paymentStatus)
+        {
+            case "active":
+                filteredProperties = filteredProperties.Where(p => p.PaymentStatus == "已付費");
+                break;
+            case "pending":
+                filteredProperties = filteredProperties.Where(p => p.PaymentStatus == "未付費" || p.PaymentStatus == "待付款");
+                break;
+        }
+    }
+    
+    // 文件上傳狀態篩選 (僅針對審核中分頁)
+    var documentUploadStatus = Context.Request.Query["documentUploadStatus"].ToString();
+    if (!string.IsNullOrEmpty(documentUploadStatus) && tableType == "pending")
+    {
+        switch (documentUploadStatus)
+        {
+            case "uploaded":
+                filteredProperties = filteredProperties.Where(p => p.HasDocumentUpload == true);
+                break;
+            case "not_uploaded":
+                filteredProperties = filteredProperties.Where(p => p.HasDocumentUpload == false);
+                break;
+        }
+    }
+    
+    // 城市篩選
+    var cityID = Context.Request.Query["cityID"].ToString();
+    if (!string.IsNullOrEmpty(cityID) && int.TryParse(cityID, out int cityIdInt))
+    {
+        // 使用城市ID進行篩選，假設PropertyData有CityId屬性或從Address中判斷
+        // 由於PropertyData目前只有Address字串，我們需要從Model中獲取城市名稱來比較
+        if (Model is zuHause.AdminViewModels.AdminPropertyListViewModel propertyModel)
+        {
+            var selectedCity = propertyModel.Cities.FirstOrDefault(c => c.CityId == cityIdInt);
+            if (selectedCity != null)
+            {
+                filteredProperties = filteredProperties.Where(p => p.Address != null && p.Address.Contains(selectedCity.CityName));
+            }
+        }
+    }
+    
+    // 租金範圍篩選
+    var rentMinStr = Context.Request.Query["rentMin"].ToString();
+    var rentMaxStr = Context.Request.Query["rentMax"].ToString();
+    if (int.TryParse(rentMinStr, out int rentMin))
+    {
+        filteredProperties = filteredProperties.Where(p => p.RentPrice >= rentMin);
+    }
+    if (int.TryParse(rentMaxStr, out int rentMax))
+    {
+        filteredProperties = filteredProperties.Where(p => p.RentPrice <= rentMax);
+    }
+    
+    // 日期範圍篩選
+    var publishDateStartStr = Context.Request.Query["publishDateStart"].ToString();
+    var publishDateEndStr = Context.Request.Query["publishDateEnd"].ToString();
+    if (DateTime.TryParse(publishDateStartStr, out DateTime publishDateStart))
+    {
+        filteredProperties = filteredProperties.Where(p => DateTime.TryParse(p.SubmissionDate, out DateTime subDate) && subDate >= publishDateStart);
+    }
+    if (DateTime.TryParse(publishDateEndStr, out DateTime publishDateEnd))
+    {
+        filteredProperties = filteredProperties.Where(p => DateTime.TryParse(p.SubmissionDate, out DateTime subDate) && subDate <= publishDateEnd.AddDays(1));
+    }
+    
+    var applyDateStartStr = Context.Request.Query["applyDateStart"].ToString();
+    var applyDateEndStr = Context.Request.Query["applyDateEnd"].ToString();
+    if (DateTime.TryParse(applyDateStartStr, out DateTime applyDateStart))
+    {
+        filteredProperties = filteredProperties.Where(p => DateTime.TryParse(p.SubmissionDate, out DateTime subDate) && subDate >= applyDateStart);
+    }
+    if (DateTime.TryParse(applyDateEndStr, out DateTime applyDateEnd))
+    {
+        filteredProperties = filteredProperties.Where(p => DateTime.TryParse(p.SubmissionDate, out DateTime subDate) && subDate <= applyDateEnd.AddDays(1));
+    }
+    
+    var updateDateStartStr = Context.Request.Query["updateDateStart"].ToString();
+    var updateDateEndStr = Context.Request.Query["updateDateEnd"].ToString();
+    if (DateTime.TryParse(updateDateStartStr, out DateTime updateDateStart))
+    {
+        filteredProperties = filteredProperties.Where(p => DateTime.TryParse(p.UpdatedDate, out DateTime updDate) && updDate >= updateDateStart);
+    }
+    if (DateTime.TryParse(updateDateEndStr, out DateTime updateDateEnd))
+    {
+        filteredProperties = filteredProperties.Where(p => DateTime.TryParse(p.UpdatedDate, out DateTime updDate) && updDate <= updateDateEnd.AddDays(1));
+    }
+    
+    // 轉換為列表並計算總數
+    var propertiesToShow = filteredProperties.ToList();
+    
+    // 分頁設定
+    int pageSize = 15;
+    string pageParamName = tableType == "pending" ? "pending_page" : "all_page";
+    int currentPage = 1;
+    if (Context.Request.Query.ContainsKey(pageParamName))
+    {
+        int.TryParse(Context.Request.Query[pageParamName], out currentPage);
+        if (currentPage < 1) currentPage = 1;
+    }
+    int totalItems = propertiesToShow.Count;
+    int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+    if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
+    
+    // 當前頁面要顯示的資料
+    var pagedProperties = propertiesToShow.Skip((currentPage - 1) * pageSize).Take(pageSize).ToList();
+}
+
+<div class="card mt-3">
+    <div class="card-body">
+        @* 批量操作功能暫時隱藏
+        <div class="mb-3">
+            <button type="button" class="btn btn-success me-2" id="@bulkBtnId" disabled>
+                <i class="fas fa-envelope"></i> 批量傳送系統訊息
+            </button>
+        </div>
+        *@
+        <style>
+            /* 確保只有超連結才有手指游標 */
+            .property-table tbody tr {
+                cursor: default;
+            }
+            .property-table tbody tr a {
+                cursor: pointer;
+            }
+            /* 自定義表格行 hover 效果 */
+            .property-table tbody tr:hover {
+                background-color: rgba(0, 0, 0, 0.075);
+            }
+        </style>
+        <div class="table-responsive">
+            <table class="table table-striped property-table">
+                <thead class="table-dark">
+                    <tr>
+                        @* 勾選框功能暫時隱藏
+                        <th style="width: 50px;">
+                            <input type="checkbox" class="form-check-input" id="@selectAllId">
+                        </th>
+                        *@
+                        <th width="8%">房源ID</th>
+                        <th>房源基本資訊</th>
+                        <th>所屬房東</th>
+                        <th>屋源狀態</th>
+                        @if (tableType == "pending")
+                        {
+                            <th class="sortable" data-sort="applyTime" data-table="@tableType">
+                                申請審核時間 
+                                <i class="bi bi-sort-up-alt sort-icon active" data-direction="asc"></i>
+                            </th>
+                            <th>房屋證明文件</th>
+                        }
+                        else
+                        {
+                            <th class="sortable" data-sort="publishDate" data-table="@tableType">
+                                建立時間 
+                                <i class="bi bi-sort-down sort-icon active" data-direction="desc"></i>
+                            </th>
+                            <th width="8%">付費狀態</th>
+                            <th class="sortable" data-sort="expiryDate" data-table="@tableType">
+                                上架期限 
+                                <i class="bi bi-sort-up-alt sort-icon" data-direction="none"></i>
+                            </th>
+                        }
+                        <th class="sortable" data-sort="updateTime" data-table="@tableType">
+                            更新時間 
+                            <i class="bi bi-sort-up-alt sort-icon" data-direction="none"></i>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var property in pagedProperties)
+                    {
+                        <tr>
+                            @* 勾選框功能暫時隱藏
+                            <td><input type="checkbox" class="form-check-input @checkboxClass" value="@property.PropertyID"></td>
+                            *@
+                            <td>@property.PropertyID</td>
+                            <td>
+                                <div><a href="/Admin/admin_propertyDetails/@property.PropertyID" target="_blank" class="text-decoration-none fw-bold">@property.PropertyTitle</a></div>
+                                <div><a href="/Admin/admin_propertyDetails/@property.PropertyID" target="_blank" class="text-decoration-none"><small class="text-muted">@property.Address</small></a></div>
+                                <div><a href="/Admin/admin_propertyDetails/@property.PropertyID" target="_blank" class="text-decoration-none"><small class="text-success fw-bold">NT$ @property.RentPrice.ToString("N0")/月</small></a></div>
+                            </td>
+                            <td><a href="/Admin/admin_userDetails/@property.LandlordId" target="_blank" class="text-decoration-none">@property.LandlordName</a></td>
+                            <td>
+                                @{
+                                    string statusBadgeClass;
+                                    switch (property.Status)
+                                    {
+                                        case "審核完成":
+                                            statusBadgeClass = "bg-success";
+                                            break;
+                                        case "審核中":
+                                            statusBadgeClass = "bg-warning";
+                                            break;
+                                        case "待付款":
+                                            statusBadgeClass = "";
+                                            break;
+                                        case "上架中":
+                                            statusBadgeClass = "bg-success";
+                                            break;
+                                        case "違規下架":
+                                            statusBadgeClass = "bg-danger";
+                                            break;
+                                        default:
+                                            statusBadgeClass = "bg-secondary";
+                                            break;
+                                    }
+                                }
+                                @if (property.Status == "待付款")
+                                {
+                                    <span class="badge" style="background-color: #0d6efd; color: white;">@property.Status</span>
+                                }
+                                else
+                                {
+                                    <span class="badge @statusBadgeClass">@property.Status</span>
+                                }
+                            </td>
+                            
+                            @if (tableType == "pending")
+                            {
+                                <td>@property.SubmissionDate</td>
+                                <td>
+                                    @if (property.HasDocumentUpload)
+                                    {
+                                        <span class="badge bg-info">已上傳</span><br>
+                                        <button class="btn btn-sm btn-outline-primary mt-1" onclick="openDocumentModal('@property.PropertyID')">查看文件</button>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning">未上傳</span>
+                                    }
+                                </td>
+                            }
+                            else
+                            {
+                                <td>@property.SubmissionDate</td>
+                                <td>
+                                    @{
+                                        string paymentBadgeClass;
+                                        switch (property.PaymentStatus)
+                                        {
+                                            case "已付費":
+                                                paymentBadgeClass = "bg-success";
+                                                break;
+                                            case "未付費":
+                                                paymentBadgeClass = "bg-secondary";
+                                                break;
+                                            case "已過期":
+                                                paymentBadgeClass = "bg-danger";
+                                                break;
+                                            default:
+                                                paymentBadgeClass = "bg-secondary";
+                                                break;
+                                        }
+                                    }
+                                    <span class="badge @paymentBadgeClass">@property.PaymentStatus</span>
+                                </td>
+                                <td>@property.ExpiryDate</td>
+                            }
+                            
+                            <td>@property.UpdatedDate</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        
+        @if (totalPages > 1)
+        {
+            <nav aria-label="@paginationLabel">
+                <ul class="pagination justify-content-center">
+                    <!-- 上一頁 -->
+                    <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                        <a class="page-link" href="#" onclick="changePage(@(currentPage - 1), '@tableType')" tabindex="@(currentPage == 1 ? "-1" : "")">上一頁</a>
+                    </li>
+                    
+                    @{
+                        int startPage = Math.Max(1, currentPage - 2);
+                        int endPage = Math.Min(totalPages, currentPage + 2);
+                        
+                        // 確保至少顯示5頁（如果總頁數>=5）
+                        if (endPage - startPage < 4 && totalPages >= 5)
+                        {
+                            if (startPage == 1)
+                            {
+                                endPage = Math.Min(totalPages, startPage + 4);
+                            }
+                            else if (endPage == totalPages)
+                            {
+                                startPage = Math.Max(1, endPage - 4);
+                            }
+                        }
+                    }
+                    
+                    <!-- 第一頁和省略號 -->
+                    @if (startPage > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="#" onclick="changePage(1, '@tableType')">1</a>
+                        </li>
+                        @if (startPage > 2)
+                        {
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        }
+                    }
+                    
+                    <!-- 頁碼 -->
+                    @for (int i = startPage; i <= endPage; i++)
+                    {
+                        <li class="page-item @(i == currentPage ? "active" : "")">
+                            <a class="page-link" href="#" onclick="changePage(@i, '@tableType')">@i</a>
+                        </li>
+                    }
+                    
+                    <!-- 省略號和最後一頁 -->
+                    @if (endPage < totalPages)
+                    {
+                        @if (endPage < totalPages - 1)
+                        {
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        }
+                        <li class="page-item">
+                            <a class="page-link" href="#" onclick="changePage(@totalPages, '@tableType')">@totalPages</a>
+                        </li>
+                    }
+                    
+                    <!-- 下一頁 -->
+                    <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                        <a class="page-link" href="#" onclick="changePage(@(currentPage + 1), '@tableType')">下一頁</a>
+                    </li>
+                </ul>
+                
+                <!-- 頁面資訊 -->
+                <div class="text-center mt-2">
+                    <small class="text-muted">
+                        顯示第 @((currentPage - 1) * pageSize + 1) - @(Math.Min(currentPage * pageSize, totalItems)) 筆，共 @totalItems 筆資料 (@totalPages 頁)
+                    </small>
+                </div>
+            </nav>
+        }
+        else if (totalItems > 0)
+        {
+            <div class="text-center mt-3">
+                <small class="text-muted">共 @totalItems 筆資料</small>
+            </div>
+        }
+    </div>
+</div>

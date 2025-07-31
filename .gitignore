@@ -1,0 +1,64 @@
+.vs/
+*.user
+
+bin/
+obj/
+.github/workflows/
+
+*.nupkg
+project.lock.json
+project.assets.json
+*.nuget.cache
+*.nuget.dgspec.json
+*.nuget.g.props
+*.nuget.targets
+
+**/CopilotIndices/
+**/SemanticSymbols.*
+
+# Others
+*.suo
+*.cache
+*.db
+*.db-wal
+*.db-shm
+*.vshost.*
+*.log
+/CLAUDE.md
+/.claude
+node_modules/
+
+# Documentation folder (should not be committed)
+docs/
+
+# Third-party libraries
+wwwroot/lib/
+
+# NuGet related files
+packages/
+*.nuget.props
+*.nuget.targets
+project.assets.json
+project.nuget.cache
+
+# Test files and temporary files
+test_*
+test-*
+Test*
+Tests/
+TempQueryApp/
+query*
+*.sql
+manual_coordinates_update.sql
+
+# MCP and temporary files
+.claude/
+.claude-credentials
+.vscode/
+CLAUDE.schema.json
+wsl-dotnet-setup.sh
+~/.nuget/
+/~/.nuget/packages
+
+appsettings.json
+appsettings.Development.json

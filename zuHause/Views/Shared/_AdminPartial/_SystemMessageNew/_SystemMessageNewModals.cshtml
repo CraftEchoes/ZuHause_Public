@@ -1,0 +1,86 @@
+@model AdminSystemMessageNewViewModel
+
+<!-- 確認發送 Modal -->
+<div class="modal fade" id="confirmSendModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="confirmSendModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmSendModalLabel">確認發送訊息</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>您確定要發送此訊息給 <strong id="confirmAudienceText"></strong> 嗎？</p>
+                <div id="confirmUserDetails" style="display: none;">
+                    <p>接收者：<strong id="confirmUserName"></strong> (<span id="confirmUserId"></span>)</p>
+                </div>
+                <p class="text-danger fw-bold">此操作無法復原、刪除或撤回。</p>
+                
+                <div class="form-check mt-3">
+                    <input class="form-check-input" type="checkbox" id="confirmCheckbox">
+                    <label class="form-check-label" for="confirmCheckbox">
+                        我確認要執行此操作
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-danger" id="finalSendBtn" disabled onclick="sendMessage()">確認發送</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 插入模板 Modal -->
+<div class="modal fade" id="templateModal" tabindex="-1" aria-labelledby="templateModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="templateModalLabel">選擇訊息模板</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="templateSearch" class="form-label">搜尋模板</label>
+                    <input type="text" class="form-control" id="templateSearch" placeholder="輸入關鍵字搜尋模板...">
+                </div>
+                
+                <div id="templateList" class="list-group">
+                    @if (Model.AvailableTemplates != null && Model.AvailableTemplates.Any())
+                    {
+                        @foreach (var template in Model.AvailableTemplates)
+                        {
+                            <a href="#" class="list-group-item list-group-item-action template-item" 
+                               data-template-id="@template.TemplateID"
+                               data-template-title="@Html.Raw(Html.Encode(template.Title))" 
+                               data-template-content="@Html.Raw(Html.Encode(template.TemplateContent))"
+                               onclick="selectTemplate(this); return false;">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">
+                                            <i class="bi bi-file-text text-primary me-1"></i>
+                                            @template.Title
+                                        </h6>
+                                        <p class="mb-1 small text-muted">@template.ContentPreview</p>
+                                        <small class="text-info">建立日期：@template.CreatedAt</small>
+                                    </div>
+                                    <i class="bi bi-chevron-right text-muted"></i>
+                                </div>
+                            </a>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-inbox fs-1 mb-2 d-block"></i>
+                            <div class="fw-semibold">尚無可用模板</div>
+                            <div class="small">目前沒有系統訊息模板</div>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,44 @@
+﻿@{
+}
+<div class="card mb-3 p-3">
+  <div class="row align-items-center">
+    <div class="col-auto"><strong>查詢區間：</strong></div>
+    <div class="col-auto">
+      <select id="selectYear" class="form-select"></select>
+    </div>
+    <div class="col-auto">
+      <select id="selectMonth" class="form-select"></select>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-md-4">
+    <div class="card p-3">
+      <h5>上架服務費收款圓餅圖</h5>
+      <div id="chartPayLoading" class="text-center my-3" style="display:none;"><div class="spinner-border"></div></div>
+      <canvas id="chartPay"></canvas>
+      <div class="mt-3">💰 應收：<span id="totalDue">Loading...</span></div>
+      <div>💵 實收：<span id="totalPaid">Loading...</span></div>
+      <div>🕑 未收：<span id="totalUnpaid">Loading...</span></div>
+    </div>
+  </div>
+  <div class="col-md-8">
+    <div class="card p-3">
+      <h5 id="chartMonthlyPayTitle">本月每日上架費收款走勢</h5>
+      <div id="chartMonthlyPayLoading" class="text-center my-3" style="display:none;"><div class="spinner-border"></div></div>
+      <canvas id="chartMonthlyPay"></canvas>
+    </div>
+  </div>
+</div>
+
+<div class="card p-3 mb-3">
+  <h5 class="mb-3" id="orderStatsTitle">房源概況</h5>
+  <div id="orderStatsLoading" class="text-center my-3" style="display:none;"><div class="spinner-border"></div></div>
+  <div id="orderStatsTable">Loading...</div>
+</div>
+<div class="card p-3 mb-3">
+    <h5 class="mb-3" id="propertyStatusStatsTitle">房源狀態概況</h5>
+    <div id="propertyStatusStatsLoading" class="text-center my-3" style="display:none;"><div class="spinner-border"></div></div>
+    <div id="propertyStatusStatsTable">Loading...</div>
+</div>

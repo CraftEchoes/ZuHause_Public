@@ -1,0 +1,20 @@
+﻿<div class='row g-3'>
+    <div class='col-md-12'>
+        <div class='card p-3'>
+            <h6>新增/編輯 身分</h6>
+            <input type='text' class='form-control mb-2' id='newRoleInput' placeholder='輸入新角色名稱'>
+
+            <label>選擇功能權限：</label>
+            <div id="permissionCheckboxContainer" class="row"></div>
+
+            <div class="col-auto">
+                <button class="btn btn-success" onclick="addRole()">新增角色</button>
+                <button class="btn btn-secondary d-none" id="cancelEditBtn" onclick="cancelEdit()">❌ 取消</button>
+            </div>
+
+            <hr />
+            <h5>身分權限列表</h5>
+            <ul class='list-group mb-3' id='roleList'></ul>
+        </div>
+    </div>
+</div>

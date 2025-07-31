@@ -1,0 +1,232 @@
+﻿@using zuHause.ViewModels.MemberViewModel
+@model RentalApplicationViewModel
+@* data-bs-toggle="modal" *@
+<button type="button" class="btn btn-aqua py-0 col-auto apply-rental-btn" data-bs-target="#applyRental" data-pass="@(Model.NationalIdNo == null ? false : true )">
+    申請租賃
+</button>
+
+
+<div class="modal fade" id="applyRental" tabindex="-1" aria-labelledby="applyRentalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-fullscreen-lg-down">
+        <form asp-controller="MemberApplications" asp-action="ApplyRental" method="post" class="w-100 apply-rental-form" enctype="multipart/form-data">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="applyRentalLabel">申請租賃</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-3">
+
+                    @* <div class="row w-100 m-0">
+                      @await Html.PartialAsync("_PartialPropertyCard")
+                    </div> *@
+                    @*
+                    <hr> *@
+                    <div class="row g-0 align-items-center gap-2">
+                        <h5>申租資訊</h5>
+                        <h6 class="col-12 m-0 me-2">
+                            <div class="row m-0">
+                                <div class="col-3">房源編號：</div>
+                                <input type="hidden" asp-for="PropertyId"/>
+                                <div class="col">@Model.PropertyId</div>
+                            </div>
+                        </h6>
+                        <h6 class="col-12 m-0 me-2">
+                            <div class="row m-0">
+                                <div class="col-3">地址：</div>
+                                <div class="col">@Model.AddressLine</div>
+                            </div>
+                        </h6>
+                        <h6 class="col-12 m-0 me-2">
+                            <div class="row m-0">
+                                <div class="col-3">承租人(乙方)：</div>
+                                <input type="hidden" asp-for="MemberName" />
+                                <div class="col">@Model.MemberName</div>
+                            </div>
+                        </h6>
+                        <h6 class="col-12 m-0 me-2">
+                            <div class="row m-0">
+                                <div class="col-3">乙方身分證字號：</div>
+                                <div class="col">@Model.NationalIdNo</div>
+                            </div>
+                        </h6>
+                        <h6 class="col-12 m-0 me-2">
+                            <div class="row m-0">
+                                <div class="col-3">乙方出生日期：</div>
+                                <div class="col">@Model.BirthDate</div>
+                            </div>
+                        </h6>
+                        <h6 class="col-12 m-0 me-2">
+                            <div class="row m-0">
+                                <div class="col-3">租金：</div>
+                                <div class="col">NT$@Model.MonthlyRent.ToString("0") 元 / 月</div>
+                            </div>
+                        </h6>
+                        <h6 class="col-12 m-0 me-2">
+
+                            <div class="row m-0">
+                                <div class="col-3 d-flex">租賃期間：</div>
+                                <div class="col d-flex flex-column gap-2">
+                                    <div class="row align-items-center">
+                                        <div class="col-auto pe-0">租期開始日</div>
+                                        <div class="col">
+                                            <input type="date" asp-for="RentalStartDate" min="@DateTime.Today.ToString("yyyy-MM-dd")">
+                                        </div>
+                                    </div>
+                                    <div class="row align-items-center">
+                                        <div class="col-auto pe-0">租期結束日</div>
+                                        <div class="col">
+                                            <input type="date" asp-for="RentalEndDate" min="@DateTime.Today.ToString("yyyy-MM-dd")">
+                                        </div>
+                                    </div>
+                                    <div class="row align-items-center">
+                                        <div class="col-12" id="rentalDurationText">請選擇租期</div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+                        </h6>
+                        <h6 class="col-12 m-0 me-2">
+                            <div class="row m-0 gap-1 align-items-center address-area">
+                                <div class="col-3">乙方戶籍地址：</div>
+                                <div class="col-auto pe-0 address-area-city">
+                                    <label class="visually-hidden" asp-for="SelectedCityId">縣市</label>
+                                    <select class="form-select form-select-sm" asp-for="SelectedCityId" asp-items="Model.CityOptions" required>
+                                        <option selected value="0">縣市</option>
+                                    </select>
+
+                                </div>
+                                <div class="col-auto px-0 address-area-district">
+
+                                    <label class="visually-hidden" asp-for="SelectedDistrictId">區域</label>
+                                    <select class="form-select form-select-sm" asp-for="SelectedDistrictId" required>
+                                        <option selected value="0">區域</option>
+                                    </select>
+
+                                </div>
+                                <div class="col px-0">
+                                    <input class="form-control form-control-sm" type="text" placeholder="地址" asp-for="AddressDetail">
+                                </div>
+                            </div>
+                        </h6>
+                    </div>
+                    <hr>
+                    <style>
+                        input::file-selector-button {
+                            display: none;
+                        }
+                    </style>
+                    <div class="row g-0 align-items-center gap-2 upload-area">
+                        <h5 class="col-12">其餘資料上傳</h5>
+                        <div class="col-12">
+                            <button type="button" class="col-auto btn p-0 add-btn">
+                                <i class="bi bi-plus-square-fill"></i>
+                            </button>
+                        </div>
+
+                        <style>
+                            .text-muted {
+                                color: #6c757d;
+                            }
+                        </style>
+                        <div class="col-12 upload-input-area">
+                            <!-- 預設上傳項目 -->
+                            <div class="row m-0 align-items-start input-item">
+                                <h6 class="col-auto mb-0 px-0 py-2">檔案：</h6>
+                                <div class="col-auto gap-2 py-0">
+                                    <div class="row align-items-center">
+                                        <label for="" class="col-auto border border-1 px-2 py-1" role="button">選擇檔案</label>
+                                        <input type="file" name="UploadFiles" id="" class="col-auto col-auto d-none">
+                                        <div class="col-auto input-file-name col-auto"></div>
+                                        <button type="button" class="col-auto btn p-0 del-btn">
+                                            <i class="bi bi-dash-square-fill"></i>
+                                        </button>
+                                    </div>
+                                    <div class="row input-feedback mt-1">
+                                        <small class="text-muted col p-0">支援 JPG、PNG、WEBP 格式，檔案大小請小於 5MB</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <template id="upload-template" class="d-none">
+                            <div class="row m-0 align-items-start input-item">
+                                <h6 class="col-auto mb-0 px-0 py-2">檔案：</h6>
+                                <div class="col-auto gap-2 py-0">
+                                    <div class="row align-items-center">
+                                        <label for="" class="col-auto border border-1 px-2 py-1" role="button">選擇檔案</label>
+                                        <input type="file" name="UploadFiles" id="" class="col-auto col-auto d-none">
+                                        <div class="col-auto input-file-name col-auto"></div>
+                                        <button type="button" class="col-auto btn p-0 del-btn">
+                                            <i class="bi bi-dash-square-fill"></i>
+                                        </button>
+                                    </div>
+                                    <div class="row input-feedback mt-1">
+                                        <small class="text-danger col p-0"></small>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
+
+
+
+
+
+
+                    </div>
+                    <hr>
+                    <div class="row g-0 align-items-center gap-2">
+                        <h5 class="col-12">訊息文字</h5>
+                        <div class="col-12">
+                            <div class="form-floating">
+                                <textarea class="form-control" placeholder="Leave a comment here" asp-for="Message"
+                                          style="resize: none; height: 8rem;"></textarea>
+                                <label asp-for="Message">想對房東說的話：</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-aqua">送出</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<div class="modal fade" id="noticeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="alertNotice" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-fullscreen-lg-down">
+
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="applyRentalLabel">提醒</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-3">
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    @:請先完成身分認證，方可進行申請
+                }
+                else
+                {
+                    @:請先登入並完成身分認證，方可進行申請
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a href="@Url.Action("MemberProfile", "Member")" class="btn btn-aqua">前往身分認證</a>
+                }
+                else
+                {
+                    <a href="@Url.Action("Login", "Member")" class="btn btn-aqua">前往登入</a>
+                }
+            </div>
+        </div>
+    </div>
+</div>

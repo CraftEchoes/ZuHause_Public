@@ -1,0 +1,179 @@
+﻿@* Views/Shared/_NavigationBar.cshtml *@
+@{
+    // 取得 ViewBag 傳進來的類別清單
+    var categories = ViewBag.categories as List<zuHause.Models.FurnitureCategory>;
+
+    // 判斷是否登入，並取得會員名稱
+    var isAuthenticated = User.Identity?.IsAuthenticated == true;
+    var memberName = isAuthenticated ? User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value : null;
+    var displayName = !string.IsNullOrEmpty(memberName) ? $"{memberName}，歡迎使用" : "訪客";
+    @RenderSection("Styles", required: false)
+
+}
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewBag.Title - 家具租借</title>
+
+    @* Bootstrap 5 核心樣式 *@
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+
+    @* 自訂 CSS（若有全域 CSS） *@
+    <link rel="stylesheet" href="~/css/furniture.css" />
+
+    @* Bootstrap Icons (人物圖示用) *@
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    @* Font Awesome (社群圖示用) *@
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+
+    <header>
+        @* Bootstrap 響應式導覽列 *@
+        <nav class="navbar navbar-expand-lg fixed-top navbar-glass">
+
+            <div class="container-fluid">
+
+                @* 左側 LOGO *@
+                <a class="navbar-brand" href="@Url.Action("FurnitureHomePage", "Furniture")">
+                    <img src="~/img/zuHauselogo.png" alt="Logo" height="40" />
+                </a>
+
+                @* 小螢幕下的漢堡選單按鈕 *@
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="切換導覽">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                @* 導覽列內容（選單 + 登入區塊） *@
+                <div class="collapse navbar-collapse" id="mainNavbar">
+
+                    @* 左側選單 *@
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item"><a class="nav-link" href="@Url.Action("FrontPage", "Tenant")">租屋首頁</a></li>
+                        <li class="nav-item"><a class="nav-link" href="@Url.Action("FurnitureHomePage", "Furniture")">家具首頁</a></li>
+                        <li class="nav-item"><a class="nav-link" href="@Url.Action("InstructionsForUse", "Furniture")">租借說明</a></li>
+                    </ul>
+
+                    @* 右側登入 / 註冊 / 購物車 *@
+                    <div class="d-flex align-items-center">
+                        @if (isAuthenticated)
+                        {
+                            <a href="@Url.Action("OrderHistory", "Furniture")" class="text-decoration-none text-dark d-flex align-items-center">
+                                <i class="bi bi-person-fill text-purple me-1"></i>
+                                <span class="me-3">@displayName</span>
+                            </a>
+                            <form asp-controller="Member" asp-action="Logout" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-outline-secondary btn-sm me-2">登出</button>
+                            </form>
+                            <a href="@Url.Action("RentalCart", "Furniture")" class="btn btn-outline-primary btn-sm">購物車</a>
+                        }
+                        else
+                        {
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="d-flex align-items-center text-dark me-3">
+                                    <i class="bi bi-person-fill me-1"></i>
+                                    <span>訪客</span>
+                                </div>
+                                <div class="d-flex align-items-center auth-links">
+                                    <a href="@Url.Action("RegisterVerifyPhone", "Member", new { ReturnUrl = Context.Request.Path })" class="nav-link px-2">註冊</a>
+                                    <div class="vr mx-1"></div>
+                                    <a href="@Url.Action("Login", "Member", new { ReturnUrl = Context.Request.Path })" class="nav-link px-2">登入</a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container-fluid mt-5 pt-5">
+        @RenderBody()
+    </main>
+
+    @* Bootstrap 的 JS（不可少，否則選單不會收合） *@
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    @* SweetAlert 套件 *@
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    @RenderSection("Scripts", required: false)
+
+    <footer style="background: linear-gradient(90deg, rgba(13, 64, 84, 1) 0%, rgba(39, 153, 171, 1) 60%, rgba(172, 205, 210, 1) 100%); color: #1c1e22; padding: 30px 0;">
+        <div class="container d-flex justify-content-between align-items-center flex-wrap">
+
+            @* 左側 Logo 與地址 *@
+            <div class="d-flex align-items-center">
+                <img src="~/images/logo.png" alt="zuHause Logo" style="height: 80px; margin-right: 20px;">
+                <div>
+                    <div>租好智慧租屋股份有限公司</div>
+                    <div>台中市南屯區公益路二段51號</div>
+                </div>
+            </div>
+
+            @* 右側條款與社群 icon *@
+            <div class="text-end mt-3 mt-md-0">
+                <div class="mb-2">
+                    <a href="#" class="text-dark me-3 text-decoration-none">服務條款</a> |
+                    <a href="#" class="text-dark mx-3 text-decoration-none">免責聲明</a> |
+                    <a href="#" class="text-dark ms-3 text-decoration-none">隱私權說明</a>
+                </div>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook fa-lg me-3 text-mint"></i></a>
+                    <a href="#"><i class="fab fa-twitter fa-lg me-3 text-mint"></i></a>
+                    <a href="#"><i class="fab fa-youtube fa-lg me-3 text-mint"></i></a>
+                    <a href="#"><i class="fas fa-envelope fa-lg me-3 text-mint"></i></a>
+                    <a href="#"><i class="fab fa-instagram fa-lg text-mint"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    @* 頁尾 *@
+    @await Html.PartialAsync("_PartialMemberToast")
+    <style>
+        /* 導覽列背景 + 高度 */
+        .navbar-glass {
+            background-color: rgba(255, 255, 255, 0.7); /* 半透明白色 */
+            backdrop-filter: blur(12px); /* 毛玻璃模糊 */
+            -webkit-backdrop-filter: blur(12px); /* Safari 支援 */
+            height: 77px;
+            position: fixed;
+            z-index: 1050;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+       .navbar-glass .nav-link,
+       .navbar-glass .navbar-brand,
+       .navbar-glass span {
+                color: #004d40 !important; /* 深綠字 */
+                font-weight: 500;
+        }
+
+        .navbar-brand img {
+            height: 65px;
+            margin-top: -5px;
+        }
+
+
+            main {
+                padding: 0;
+            }
+
+
+            .bg-furniture-wrapper {
+                padding-bottom: 60px;
+            }
+            footer {
+                margin-top: 60px; /* 調整距離可自行加大 */
+                padding-top: 30px; /* 若要內距感覺更空 */
+            }
+
+    </style>
+
+</body>
+</html>
+

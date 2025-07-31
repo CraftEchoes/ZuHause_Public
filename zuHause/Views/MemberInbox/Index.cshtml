@@ -1,0 +1,50 @@
+﻿@using zuHause.ViewModels.MemberViewModel
+@model List<SystemMessageViewModel>
+@{
+    ViewData["Title"] = "通知管理";
+    ViewData["activePage"] = "MemberInbox";
+    int count = 0;
+}
+<div class="row w-100 gx-5 justify-content-center position-relative h-100">
+    @await Html.PartialAsync("_PartialMemberSideBar")
+    <div class="col-10 d-flex justify-content-start flex-column
+        align-items-center">
+        <div class="row w-100">
+            <h1 class="fs-3 text-black px-0 mb-3">通知管理</h1>
+            <hr />
+            <div class="col px-0">
+                @foreach (SystemMessageViewModel item in Model)
+                {
+                    count++;
+                    ViewDataDictionary partialViewCount = new ViewDataDictionary(ViewData)
+                    {
+                        {"count",count}
+                    };
+                    @await Html.PartialAsync("_PartialInboxCard", item, partialViewCount)
+                    
+                }
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/InboxFetchRead.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const highlightId = '@ViewBag.HighlightId';
+            if (highlightId) {
+                const target = document.querySelector(`[data-info="${highlightId}"]`);
+                if (target) {
+                    const collapseBtn = target.querySelector(".accordion-button");
+                    const collapseArea = target.querySelector(".accordion-collapse");
+                    const collapseInstance = bootstrap.Collapse.getOrCreateInstance(collapseArea);
+                    collapseInstance.show();
+                }
+            }
+        });
+    </script>
+
+}

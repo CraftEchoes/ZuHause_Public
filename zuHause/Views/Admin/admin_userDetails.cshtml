@@ -1,0 +1,32 @@
+@model AdminUserDetailsViewModel
+@{
+    ViewData["Title"] = Model.PageTitle;
+    ViewData["MemberData"] = Model.Data;
+    Layout = "_AdminLayout";
+}
+
+<!-- Bootstrap Icons CDN -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+<!-- Admin Styles -->
+<link href="~/css/admin-style.css" rel="stylesheet" />
+
+<div class="container-fluid fade-in" style="margin-bottom: 120px; padding-bottom: 40px;">
+    @await Html.PartialAsync("_AdminPartial/_UserDetails/_HeaderSection")
+    @await Html.PartialAsync("_AdminPartial/_UserDetails/_TabNavigation")
+
+    @await Html.PartialAsync("_AdminPartial/_UserDetails/_TabContent")
+</div>
+
+@section Scripts {
+    <script src="~/js/admin_js/user-details.js"></script>
+    <script>
+        // 設定當前會員ID
+        var currentMemberId = '@Model.Data.MemberID';
+        // 頁面載入完成後設定
+        document.addEventListener('DOMContentLoaded', function() {
+            setCurrentMemberId(currentMemberId);
+        });
+    </script>
+}
+
+@await Html.PartialAsync("_AdminPartial/_UserDetails/_UserDetailsModals", Model.Data)

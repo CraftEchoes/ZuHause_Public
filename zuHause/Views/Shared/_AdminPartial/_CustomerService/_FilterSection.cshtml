@@ -1,0 +1,49 @@
+<!-- 篩選與搜尋區 -->
+<div class="filter-section">
+    <form id="searchForm" class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">搜尋關鍵字</label>
+            <div class="input-group">
+                <select id="searchField" class="form-select" style="flex: 0 0 auto; width: auto;">
+                    <option value="all">全部欄位</option>
+                    <option value="subject">主旨</option>
+                    <option value="memberName">會員姓名</option>
+                    <option value="content">案件內容</option>
+                </select>
+                <input type="text" id="searchKeyword" class="form-control" placeholder="輸入搜尋關鍵字">
+                <button class="btn btn-outline-primary" type="button" id="quickSearchBtn">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">處理狀態</label>
+            <select id="statusFilter" class="form-select">
+                <option value="">全部</option>
+                <option value="PENDING">待處理</option>
+                <option value="PROGRESS">處理中</option>
+                <option value="RESOLVED">已處理</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">案件類別</label>
+            <select id="categoryFilter" class="form-select">
+                <option value="">全部</option>
+                <option value="PROPERTY">房源</option>
+                <option value="CONTRACT">合約</option>
+                <option value="FURNITURE">家具</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">&nbsp;</label>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary" id="searchBtn">
+                    <i class="bi bi-search"></i> 搜尋
+                </button>
+                <button type="button" class="btn btn-outline-secondary" id="resetBtn">
+                    <i class="bi bi-arrow-clockwise"></i> 重設
+                </button>
+            </div>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,67 @@
+﻿@using zuHause.ViewModels.MemberViewModel
+@{
+    ViewData["activePage"] = "MemberContracts";
+}
+@model List<ContractsViewModel>
+
+<div class="row w-100 gx-5 justify-content-center position-relative h-100">
+    @await Html.PartialAsync("_PartialMemberSideBar")
+    <div class="col-10 d-flex justify-content-start flex-column
+        align-items-center">
+        <div class="row w-100">
+            <h1 class="fs-3 text-black px-0 mb-3">合約管理</h1>
+            <hr />
+            <div class="col-12 px-0">
+                <div class="tab-content" id="ApplicationTypeContent">
+                    <div class="tab-pane fade show active py-3" id="allItemTab-pane" role="tabpanel"
+                         aria-labelledby="allItemTab" tabindex="0">
+                        <div class="row w-100 mx-0 mb-3 align-items-center justify-content-end">
+                            <div class="col-auto px-0">
+                                <form asp-action="Index" asp-controller="MemberContracts" method="get">
+                                    <select class="form-select" id="statusFilter" name="statusFilter" onchange="this.form.submit()">
+                                        <option value="">合約狀態</option>
+                                        @foreach (SystemCode item in ViewBag.codeCategory)
+                                        {
+                                            // 移除DRAFT狀態過濾 - 所有合約狀態都顯示
+                                            var isSelected = (item.Code == Context.Request.Query["statusFilter"]);
+                                            <option value="@item.Code" selected="@(isSelected ? "selected" : null)">
+                                                @item.CodeName
+                                            </option>
+                                        }
+                                    </select>
+                                </form>
+
+                            </div>
+                        </div>
+                        <div class="row w-100 mx-0 gy-3">
+
+
+                            @foreach (ContractsViewModel item in Model)
+                            {
+                                @await Component.InvokeAsync("MemberContractCard", new { model = item })
+                            }
+
+                        </div>
+
+                    </div>
+                    <div class="tab-pane fade" id="applyHouseViewing-pane" role="tabpanel"
+                         aria-labelledby="applyHouseViewing" tabindex="0">
+                        ...
+                    </div>
+                    <div class="tab-pane fade" id="applyRental-pane" role="tabpanel" aria-labelledby="applyRental"
+                         tabindex="0">
+                        ...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+</div>
+
+@section Scripts {
+    <script src="~/js/changeMemberContractCard.js"></script>
+}

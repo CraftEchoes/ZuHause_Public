@@ -1,0 +1,183 @@
+@model dynamic
+
+@{
+    var tabId = ViewData["TabId"] as string ?? "all";
+    var idPrefix = ViewData["IdPrefix"] as string ?? "";
+    var hasLandlordFilter = ViewData["HasLandlordFilter"] as bool? ?? true;
+    var hasIdUpload = ViewData["HasIdUpload"] as bool? ?? false;
+    var hasApplyDate = ViewData["HasApplyDate"] as bool? ?? false;
+    var hasAccountStatus = ViewData["HasAccountStatus"] as bool? ?? true;
+    var hasVerificationStatus = ViewData["HasVerificationStatus"] as bool? ?? true;
+    var verificationStatusOptions = ViewData["VerificationStatusOptions"] as string ?? "full";
+}
+
+<div class="card mt-3">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">會員篩選</h5>
+        <button type="button" class="btn btn-outline-info btn-sm" id="@(idPrefix)advancedSearchBtn@(tabId)">
+            <i class="fas fa-chevron-down"></i> 進階篩選
+        </button>
+    </div>
+    <div class="card-body">
+        <form>
+            <!-- 基本搜尋列 -->
+            <div class="row g-3 mb-3">
+                <!-- 關鍵字搜尋 6/12 -->
+                <div class="col-md-6">
+                    <label for="@(idPrefix)searchInput@(tabId)" class="form-label">關鍵字搜尋</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="搜尋關鍵字..." id="@(idPrefix)searchInput@(tabId)">
+                        <select class="form-select" id="@(idPrefix)searchField@(tabId)" style="max-width: 150px;">
+                            <option value="memberID">會員ID</option>
+                            <option value="memberName">姓名</option>
+                            <option value="email">電子郵件</option>
+                            <option value="phoneNumber">手機號碼</option>
+                            <option value="nationalIdNo">身分證字號</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- 身分證驗證 2/12 -->
+                @if (hasIdUpload)
+                {
+                    <div class="col-md-2">
+                        <label for="@(idPrefix)idUploadStatus@(tabId)" class="form-label">身分證上傳</label>
+                        <select class="form-select" id="@(idPrefix)idUploadStatus@(tabId)">
+                            <option value="">全部</option>
+                            <option value="uploaded">已上傳</option>
+                            <option value="not_uploaded">未上傳</option>
+                            <option value="reviewing">審核中</option>
+                            <option value="approved">審核通過</option>
+                            <option value="rejected">審核拒絕</option>
+                        </select>
+                    </div>
+                }
+                else if (hasVerificationStatus)
+                {
+                    <div class="col-md-2">
+                        <label for="@(idPrefix)verificationStatus@(tabId)" class="form-label">身分證驗證</label>
+                        <select class="form-select" id="@(idPrefix)verificationStatus@(tabId)">
+                            <option value="">全部</option>
+                            <option value="verified">已驗證</option>
+                            <option value="pending">等待驗證</option>
+                            @if (verificationStatusOptions != "limited")
+                            {
+                                <option value="unverified">尚未驗證</option>
+                            }
+                        </select>
+                    </div>
+                }
+                else
+                {
+                    <div class="col-md-2">
+                        <!-- 空白欄位保持佈局 -->
+                    </div>
+                }
+                
+                <!-- 帳戶狀態 2/12 -->
+                @if (hasAccountStatus)
+                {
+                    <div class="col-md-2">
+                        <label for="@(idPrefix)accountStatus@(tabId)" class="form-label">帳戶狀態</label>
+                        <select class="form-select" id="@(idPrefix)accountStatus@(tabId)">
+                            <option value="">全部</option>
+                            <option value="active">啟用中</option>
+                            <option value="inactive">停用</option>
+                        </select>
+                    </div>
+                }
+                else
+                {
+                    <div class="col-md-2">
+                        <!-- 空白欄位保持佈局 -->
+                    </div>
+                }
+                
+                <!-- 按鈕區域 2/12 -->
+                <div class="col-md-2">
+                    <label class="form-label d-block">&nbsp;</label>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-primary" id="@(idPrefix)searchBtn@(tabId)">
+                            <i class="bi bi-search"></i> 搜尋
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="@(idPrefix)resetBtn@(tabId)">
+                            <i class="bi bi-arrow-clockwise"></i> 重置
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 進階搜尋摺疊區域 -->
+            <div class="collapse" id="@(idPrefix)advancedSearchCollapse@(tabId)">
+                <div class="border-top pt-3">
+                    <div class="row g-3">
+                        <div class="col-md-2">
+                            <label for="@(idPrefix)gender@(tabId)" class="form-label">性別</label>
+                            <select class="form-select" id="@(idPrefix)gender@(tabId)">
+                                <option value="">全部</option>
+                                <option value="1">男性</option>
+                                <option value="2">女性</option>
+                                <option value="other">其他</option>
+                            </select>
+                        </div>
+                        
+                        @if (hasLandlordFilter)
+                        {
+                            <div class="col-md-2">
+                                <label for="@(idPrefix)isLandlord@(tabId)" class="form-label">房東身分</label>
+                                <select class="form-select" id="@(idPrefix)isLandlord@(tabId)">
+                                    <option value="">全部</option>
+                                    <option value="true">是</option>
+                                    <option value="false">否</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="@(idPrefix)residenceCityID@(tabId)" class="form-label">居住縣市</label>
+                                <select class="form-select" id="@(idPrefix)residenceCityID@(tabId)">
+                                    <option value="">全部</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="@(idPrefix)primaryRentalCityID@(tabId)" class="form-label">偏好租賃縣市</label>
+                                <select class="form-select" id="@(idPrefix)primaryRentalCityID@(tabId)">
+                                    <option value="">全部</option>
+                                </select>
+                            </div>
+                        }
+                    </div>
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-4">
+                            <label class="form-label">註冊日期範圍</label>
+                            <div class="input-group">
+                                <input type="date" class="form-control" id="@(idPrefix)registerDateStart@(tabId)" placeholder="開始日期">
+                                <span class="input-group-text">至</span>
+                                <input type="date" class="form-control" id="@(idPrefix)registerDateEnd@(tabId)" placeholder="結束日期">
+                            </div>
+                        </div>
+                        
+                        @if (hasApplyDate)
+                        {
+                            <div class="col-md-4">
+                                <label class="form-label">申請日期範圍</label>
+                                <div class="input-group">
+                                    <input type="date" class="form-control" id="@(idPrefix)applyDateStart@(tabId)" placeholder="開始日期">
+                                    <span class="input-group-text">至</span>
+                                    <input type="date" class="form-control" id="@(idPrefix)applyDateEnd@(tabId)" placeholder="結束日期">
+                                </div>
+                            </div>
+                        }
+                        
+                        <div class="col-md-4">
+                            <label class="form-label">最後登入日期範圍</label>
+                            <div class="input-group">
+                                <input type="date" class="form-control" id="@(idPrefix)lastLoginDateStart@(tabId)" placeholder="開始日期">
+                                <span class="input-group-text">至</span>
+                                <input type="date" class="form-control" id="@(idPrefix)lastLoginDateEnd@(tabId)" placeholder="結束日期">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

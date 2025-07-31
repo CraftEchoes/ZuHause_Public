@@ -1,0 +1,197 @@
+﻿@using System.Linq
+@model zuHause.ViewModels.TenantViewModel.FrontPageViewModel
+
+@{
+    ViewData["Title"] = "首頁";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/FrontPage.css" asp-append-version="true" />
+}
+<main>
+    @* 公告跑馬燈 *@
+    <div class="announcement-marquee-container">
+        <span id="dynamicMarqueeContent" class="announcement-marquee-content">
+            @*跑馬燈內容*@
+        </span>
+    </div>
+
+    <div class="carousel-container">
+        <div id="myCustomCarousel" >
+            <div id="carouselImagesContainer" >
+            </div>
+
+            <button id="prevBtn" class="carousel-control-prev" >
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button id="nextBtn" class="carousel-control-next" >
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+
+            <div id="carouselIndicators" >
+            </div>
+        </div>
+
+
+        <div class="search-box-overlay">
+            <div class="input-group">
+                <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-citycode="TPE" id="cityDropdownBtn">
+                    臺北市 @* 預設顯示臺北市，與圖片一致 *@
+                </button>
+
+                <div class="dropdown-menu dropdown-menu-grid row g-2" aria-labelledby="cityDropdownBtn" style="min-width: 400px; padding: 15px;">
+                    <div class="col-6 col-md-2">
+                        @* 北部地區列 *@
+                        <h6 class="dropdown-header">北部</h6>
+                        <div class="custom-city-list">
+                            <a class="dropdown-item" href="#" data-city="基隆市" data-cityCode="KEE">基隆市</a>
+                            <a class="dropdown-item active" href="#" data-city="臺北市" data-cityCode="TPE">臺北市</a> @* 預設 active，用於粗體變色 *@
+                            <a class="dropdown-item" href="#" data-city="新北市" data-cityCode="NTPC">新北市</a>
+                            <a class="dropdown-item" href="#" data-city="桃園市" data-cityCode="TAO">桃園市</a>
+                            <a class="dropdown-item" href="#" data-city="新竹縣" data-cityCode="HSQ">新竹縣</a>
+                            <a class="dropdown-item" href="#" data-city="新竹市" data-cityCode="HSZ">新竹市</a>
+                            <a class="dropdown-item" href="#" data-city="宜蘭縣" data-cityCode="ILA">宜蘭縣</a>
+                        </div>
+                    </div>
+
+                    <div class="col-6 col-md-2">
+                        @* 中部地區列 *@
+                        <h6 class="dropdown-header">中部</h6>
+                        <div class="custom-city-list">
+                            <a class="dropdown-item" href="#" data-city="苗栗縣" data-cityCode="MIA">苗栗縣</a>
+                            <a class="dropdown-item" href="#" data-city="臺中市" data-cityCode="TXG">臺中市</a>
+                            <a class="dropdown-item" href="#" data-city="彰化縣" data-cityCode="CHA">彰化縣</a>
+                            <a class="dropdown-item" href="#" data-city="南投縣" data-cityCode="NAN">南投縣</a>
+                            <a class="dropdown-item" href="#" data-city="雲林縣" data-cityCode="YUN">雲林縣</a>
+                        </div>
+                    </div>
+
+                    <div class="col-6 col-md-2">
+                        @* 南部地區列 *@
+                        <h6 class="dropdown-header">南部</h6>
+                        <div class="custom-city-list">
+                            <a class="dropdown-item" href="#" data-city="嘉義縣" data-cityCode="CYQ">嘉義縣</a>
+                            <a class="dropdown-item" href="#" data-city="嘉義市" data-cityCode="CYI">嘉義市</a>
+                            <a class="dropdown-item" href="#" data-city="臺南市" data-cityCode="TNN">臺南市</a>
+                            <a class="dropdown-item" href="#" data-city="高雄市" data-cityCode="KHH">高雄市</a>
+                            <a class="dropdown-item" href="#" data-city="屏東縣" data-cityCode="PIF">屏東縣</a>
+
+                        </div>
+                    </div>
+
+                    <div class="col-6 col-md-2">
+                        @* 東部地區列 *@
+                        <h6 class="dropdown-header">東部</h6>
+                        <div class="custom-city-list">
+                            <a class="dropdown-item" href="#" data-city="花蓮縣" data-cityCode="HUA">花蓮縣</a>
+                            <a class="dropdown-item" href="#" data-city="臺東縣" data-cityCode="TTT">臺東縣</a>
+                        </div>
+                    </div>
+
+                    <div class="col-6 col-md-2">
+                        @* 離島地區列 *@
+                        <h6 class="dropdown-header">離島</h6>
+                        <div class="custom-city-list">
+                            <a class="dropdown-item" href="#" data-city="澎湖縣" data-cityCode="PEN">澎湖縣</a>
+                            <a class="dropdown-item" href="#" data-city="金門縣" data-cityCode="KIN">金門縣</a>
+                            <a class="dropdown-item" href="#" data-city="連江" data-cityCode="LIE">連江</a>
+                        </div>
+                    </div>
+                </div>
+                <input type="text" class="form-control" placeholder="請輸入關鍵字" aria-label="Keyword input" id="searchInput">
+                <button class="btn btn-primary" type="button" id="searchBtn"><i class="bi bi-search"></i> 搜尋</button>
+            </div>
+            <div id="searchHistory" class="text-start d-flex flex-wrap gap-2 mt-2">
+                @* 搜尋歷史紀錄將通過 JavaScript 動態載入，但切版時可以忽略其內容 *@
+            </div>
+        </div>
+    </div>
+
+    @* 猜你喜歡區塊 *@
+    <section class="container my-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2>
+                猜你喜歡
+                <i class="bi bi-search" data-bs-toggle="tooltip" data-bs-placement="top" title="根據使用者的搜尋內容顯示，若未搜尋過則根據填寫的主要承租區域而定。"></i>
+            </h2>
+            <a id="exploreMoreBtn" class="text-decoration-none h5">
+                探索更多物件 <i class="bi bi-chevron-right"></i>
+            </a>
+        </div>
+        <div class="row row-cols-1 row-cols-md-4 g-4" id="youMayLikeProperties">
+            @* Changed to row-cols-md-4 for better layout on medium screens and up *@
+            @for (int i = 0; i < 8; i++) @* 範例：顯示8個卡片，與圖片一致 *@
+            {
+                <div class="col">
+                    <div class="card card-listing">
+                        <img src="/img/PropertyImages/3020.jpg" class="card-img-top" alt="Property Image">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="card-title mb-0">臺中市南屯區</h5> @* 房源標題 *@
+                                <button type="button" class="btn btn-link p-0 love-button" data-favorited="false">
+                                    <i class="bi bi-heart love-icon empty"></i> @* 預設空心愛心 *@
+                                </button>
+                            </div>
+                            <p class="card-text">
+                                <span class="text-danger">10000</span>/月<br>
+                                可養寵
+                            </p> @* 範例租金 *@
+                            <div class="text-end">
+                                @* 將了解更多按鈕靠右 *@
+                                <a href="@Url.Action("Detail", "Property", new { id = i + 1 })" class="btn btn-sm btn-outline-primary">了解更多</a> @* 點選顯示該房源 *@
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+
+    @* 特色房源區塊 *@
+    @* <section class="container my-5">
+        <div class="row align-items-center">
+            <div class="col-md-6 mb-4 mb-md-0">
+               
+                <div class="bg-light p-3 rounded d-flex align-items-center justify-content-center" style="height: 300px; overflow: hidden;">
+                   
+                    <img src="" class="img-fluid" alt="Featured Property">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h2 class="mb-0">
+                        房源標題
+                        <button type="button" class="btn btn-link p-0 love-button" data-favorited="true">
+                            <i class="bi bi-heart love-icon empty"></i>
+                        </button>
+                    </h2>
+                </div>
+                <p class="lead text-danger">10000/月</p>
+                <p>臺中市南屯區公益路二段51號</p>
+                <p>這是一個特色房源的詳細描述，可以包含多行文字，例如：可養寵、可短租、家電齊全、交通便利等。</p>
+                <a href="@Url.Action("Detail", "Property", new { id = 1 })" class="btn btn-outline-primary mt-3">
+                    了解更多 <i class="fas fa-chevron-right"></i>
+                </a>
+            </div>
+        </div>
+    </section> *@
+
+</main>
+
+<button onclick="topFunction()" id="backToTopBtn" title="回到頂端">
+    <i class="bi bi-arrow-up"></i> @* Changed icon to consistent with previous recommendation *@
+</button>
+
+
+@section Scripts {
+
+    <script>
+        var clientCarouselImageUrls = @Html.Raw(Json.Serialize(Model.Carousel.ImageUrls));
+        var clientMarqueeMessages = @Html.Raw(Json.Serialize(Model.Marquee.MarqueeMessages));
+        var clientIsAuthenticated = @(User.Identity?.IsAuthenticated == true ? "true" : "false");
+
+    </script>
+    <script src="~/js/FrontPage.js" asp-append-version="true"></script>
+}

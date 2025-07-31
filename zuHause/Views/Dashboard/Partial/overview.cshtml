@@ -1,0 +1,54 @@
+﻿@{
+    Layout = null;
+}
+
+<div class="row g-3">
+    <div class="col-md-4">
+        <div class="card p-3">📈 今日註冊：<h4 id="todayRegister">-- 位</h4></div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3">🏠 今日上架房源：<h4 id="todayProperty">-- 間</h4></div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3">🪑 今日出租家具訂單量：<h4 id="todayFurniture">-- 件</h4></div>
+    </div>
+
+    <div class="d-flex justify-content-end mb-3 align-items-center gap-2">
+        <label for="dataRangeSelect" class="form-label mb-0">選擇時間範圍：</label>
+        <select id="dataRangeSelect" class="form-select w-auto">
+            <option value="week">本週</option>
+            <option value="month" selected>本月</option>
+            <option disabled>──────────</option>
+            @for (int m = 1; m <= 12; m++)
+            {
+                <option value="@m">@m 月</option>
+            }
+        </select>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card p-3">
+            📈 <span id="rangeLabelRegister">本週</span>註冊：<h4 id="weekRegister">-- 位</h4>
+            <canvas id="total_registration"></canvas>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3">
+            🏠 <span id="rangeLabelProperty">本週</span>上架房源：<h4 id="weekProperty">-- 間</h4>
+            <canvas id="Total_Listings_Houses"></canvas>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3">
+            🪑 <span id="rangeLabelFurniture">本週</span>出租家具訂單量：<h4 id="weekFurniture">-- 件</h4>
+            <canvas id="Total_Shelves_Furniture"></canvas>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <canvas id="chartOrders"></canvas>
+    </div>
+    <div class="col-md-6">
+        <canvas id="chartRevenue"></canvas>
+    </div>
+</div>
+

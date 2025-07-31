@@ -1,0 +1,13 @@
+@model AdminCustomerServiceDetailsViewModel
+
+<!-- 使用者需求內容卡片 -->
+<div class="card mb-4">
+    <div class="card-header">
+        使用者需求內容
+    </div>
+    <div class="card-body">
+        <p><strong>主旨：</strong> @Model.Subject</p>
+        <div style="white-space: pre-wrap;">@Model.TicketContent</div>
+        <small class="text-muted">發送時間: @Model.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")</small>
+    </div>
+</div>

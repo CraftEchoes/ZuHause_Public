@@ -1,0 +1,182 @@
+@using zuHause.ViewModels.MemberViewModel;
+@using System.Security.Claims
+@{
+    string? role = User.FindFirst(ClaimTypes.Role)?.Value;
+}
+@model zuHause.ViewModels.NavbarMemberViewModel
+<header class="position-sticky w-100 top-0 navbar-glass" style="z-index: 50;">
+    <nav class="navbar navbar-expand-lg position-relative py-0" data-bs-theme="aqua">
+        <div class="container-fluid">
+            @if (Model.NavigationType == "landlord")
+            {
+                <a asp-action="PropertyManagement" asp-controller="Landlord" class="navbar-brand" style="width:13rem;">
+                    <img src="~/images/logo.png" alt="" class="w-100 object-fit-contain">
+                </a>
+            }
+            else
+            {
+                <a asp-action="FrontPage" asp-controller="Tenant" class="navbar-brand" style="width:13rem;">
+                    <img src="~/images/logo.png" alt="" class="w-100 object-fit-contain">
+                </a>
+            }
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo02"
+                    aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarTogglerDemo02">
+                <ul class="navbar-nav mb-2 mb-lg-0 align-items-center">
+                    <li class="nav-item mx-3">
+                        <a asp-action="FrontPage" asp-controller="Tenant" class="nav-link active" aria-current="page">首頁</a>
+                    </li>
+                    @* <li class="nav-item mx-3">
+                        <a class="nav-link">前往尋租</a>
+                    </li> *@
+                    <li class="nav-item mx-3">
+                        <a asp-action="FurnitureHomePage" asp-controller="Furniture" class="nav-link">家具租賃</a>
+                    </li>
+                    <!-- 根據用戶身份顯示不同的導航選項 -->
+                    @switch (Model.NavigationType)
+                    {
+                        case "landlord":
+                            <!-- 已驗證房東：顯示管理中心 -->
+                            <li class="nav-item mx-3">
+                                <a asp-controller="Landlord" asp-action="PropertyManagement" class="nav-link">
+                                    <i class="bi bi-building me-1"></i>管理中心
+                                </a>
+                            </li>
+                            break;
+
+                        case "tenant":
+                            <!-- 房客或未驗證房東：顯示成為房東 -->
+                            <li class="nav-item mx-3">
+                                <a href="/landlord/become" class="nav-link">
+                                    <i class="bi bi-person-plus me-1"></i>成為房東
+                                </a>
+                            </li>
+                            break;
+
+                        case "guest":
+                        default:
+                            <!-- 未登入用戶：顯示成為房東 -->
+                            <li class="nav-item mx-3">
+                                <a href="/landlord/become" class="nav-link">成為房東</a>
+                            </li>
+                            break;
+                    }
+                    <li class="nav-item mx-3">
+                        <div class="btn-group">
+                            <button type="button" class="btn dropdown-toggle d-flex align-items-center gap-2 ps-0 position-relative"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                通知總覽
+                                @if (User.Identity?.IsAuthenticated == true && (Model.NeverReadCount>0))
+                                {
+                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                        
+                                            @(Model.NeverReadCount > 99 ? "99+" : Model.NeverReadCount.ToString())
+                                            <span class="visually-hidden">通知總覽</span>
+                                        </span>
+                                }
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end notification-dropdown">
+                                <li>
+                                    <h6 class="dropdown-header">通知總覽</h6>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                @foreach (SystemMessageViewModel item in Model.LatestNotifications)
+                                {
+                                    <li class="@((item.IsRead == false && item.ModuleCode != "System") ? "bg-primary-subtle" : "")">
+                                        <a class="dropdown-item" asp-action="Index" asp-controller="MemberInbox" asp-route-notificationId="@item.NotificationId">
+                                            <div class="d-flex w-100 justify-content-between">
+                                                <span class="fw-bold">
+                                                    @(item.AudienceTypeCode == "User" ? "系統通知" : "系統公告")
+                                                </span>
+                                                <small>@(item.SentAt)</small>
+                                            </div>
+                                            <small class="text-muted text-truncate d-block">@(item.Title)</small>
+                                        </a>
+                                    </li>
+                                }
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <a asp-action="Index" asp-controller="MemberInbox" class="dropdown-item text-center notification-link">我的通知</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <li class="nav-item ms-3">
+                            <!-- Example single danger button -->
+                            <div class="btn-group w-100">
+                                <button type="button" class="btn dropdown-toggle d-flex align-items-center gap-2 ps-0 w-100"
+                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                    <div class="user-img rounded-circle">
+                                        <img src="@Url.Content(Model.Avatar)" alt="" class="rounded-circle">
+                                    </div>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a asp-action="MemberProfile" asp-controller="Member" class="dropdown-item text-center">個人檔案</a>
+                                    </li>
+                                    <li>
+                                        <a asp-action="Index" asp-controller="MemberInbox" class="dropdown-item text-center">通知管理</a>
+                                    </li>
+                                    @if (role == "1")
+                                    {
+                                        <li>
+                                            <a asp-action="Index" asp-controller="MemberApplications" class="dropdown-item text-center">申請紀錄管理</a>
+                                        </li>
+                                    }
+                                    <li>
+                                        <a asp-action="Index" asp-controller="MemberContracts" class="dropdown-item text-center">我的合約</a>
+                                    </li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                    <li>
+                                        <div class="text-center p-0">
+                                            <form id="logoutForm" asp-controller="Member" asp-action="Logout" method="post" class="w-100">
+                                                @Html.AntiForgeryToken()
+                                                <button id="logoutSubmitButton" type="submit" class="btn w-100 dropdown-item">登出</button>
+                                            </form>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item mx-3 d-flex align-items-center">
+                            <a class="nav-link" asp-controller="Member" asp-action="RegisterVerifyPhone">註冊</a>
+                            <div class="nav-separator"></div>
+                            <a class="nav-link" asp-controller="Member" asp-action="Login">登入</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<style>
+/* 通用 dropdown hover 樣式 - 覆蓋 Bootstrap 預設 */
+header.navbar-glass nav .dropdown-item:focus,
+header.navbar-glass nav .dropdown-item:hover {
+    background-color: #d1e3e6 !important;
+    color: #225e5d !important;
+}
+
+/* 特殊按鈕樣式 - 我的通知和登出按鈕 */
+header.navbar-glass .dropdown-menu .notification-link:hover,
+header.navbar-glass .dropdown-menu .notification-link:focus,
+header.navbar-glass .dropdown-menu #logoutSubmitButton:hover,
+header.navbar-glass .dropdown-menu #logoutSubmitButton:focus {
+    background-color: #225e5d !important;
+    color: white !important;
+}
+</style>
